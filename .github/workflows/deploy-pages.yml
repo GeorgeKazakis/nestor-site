@@ -1,4 +1,4 @@
-name: Deploy preview to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -29,21 +29,19 @@ jobs:
 
       - run: npm ci
 
-      # public/media/ is gitignored (~107MB, reproducible), so fetch content
-      # and assets from the WordPress install at build time.
-      - name: Pull content from WordPress
-        run: npm run content:pull
+      # No content:pull step: the WordPress install is retired, so content and
+      # media are committed to the repo and are the source of truth.
 
       - uses: actions/configure-pages@v5
         id: pages
 
+      # origin/base_path come from the Pages config, so this needs no edits
+      # when the custom domain is attached: origin becomes
+      # https://nestorhorizoneu.com and base_path becomes empty.
       - name: Build
         env:
           SITE_URL: ${{ steps.pages.outputs.origin }}
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
-          # Preview deploy: keep it out of search results so it can't compete
-          # with the live nestorhorizoneu.com.
-          NOINDEX: '1'
         run: npm run build
 
       # Needs the same BASE_PATH as the build: the emitted URLs are prefixed,

@@ -2,9 +2,8 @@ node_modules/
 dist/
 .astro/
 
-# Media is reproducible from the WordPress install via `npm run content:pull`.
-# Keeping ~50MB of binaries (incl. a large hero video) out of git history.
-public/media/
+# public/media/ IS committed. The WordPress install is being retired, so it can
+# no longer be re-fetched — the optimized assets (~5MB) are the source of truth.
 .DS_Store
 *.log
 .env

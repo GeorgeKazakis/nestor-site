@@ -13,23 +13,33 @@ NESTOR is funded by the European Union under Horizon Europe (project 101120075).
 
 ## How it works
 
-The WordPress install remains the editing surface. `scripts/pull-content.mjs`
-snapshots it into the repo, and Astro builds static HTML from that snapshot.
-
-```
-WordPress (REST API)  ──pull──▶  src/content/*.json + public/media/  ──build──▶  dist/
-```
+Content and media are **committed to this repo** and are the source of truth.
+The WordPress install has been retired, so there is no build-time dependency on
+it — `npm run build` works offline.
 
 ```bash
 npm install
-npm run content:pull   # refresh content + media from the live WP site
 npm run dev            # local dev server
 npm run build          # static build into dist/
 npm run preview        # serve the build locally
 ```
 
-Re-run `npm run content:pull` whenever the team edits content in WordPress, then
-rebuild. Nothing else needs touching.
+Edit content by changing `src/content/pages.json`, `src/content/posts.json` or
+`src/content/home.html` (these hold rendered WordPress block HTML), and add
+images to `public/media/`.
+
+### Re-importing from WordPress (legacy)
+
+`scripts/pull-content.mjs` originally snapshotted the WordPress install over the
+REST API, and is kept for reference. It is **no longer wired into the build** and
+will only work while a WordPress source is still reachable:
+
+```bash
+npm run content:pull   # re-snapshot + re-optimize; overwrites src/content/
+```
+
+If you ever point it at a surviving `*.wordpress.com` address, change `SRC` at
+the top of the script.
 
 ### What the pull script does
 
@@ -147,9 +157,43 @@ Still outstanding:
 
 ## Deploying
 
-Any static host works — `npm run build` and serve `dist/`. Configure the host to
-serve `404.html` for unmatched routes.
+`.github/workflows/deploy-pages.yml` builds and publishes to GitHub Pages on
+every push to `main`. The build is self-contained — no external services are
+contacted.
 
-Because media is gitignored, CI must run `npm run content:pull` before
-`npm run build` (this requires the WordPress site to be reachable). Alternatively,
-commit `public/media/` via Git LFS once the video and images are optimised.
+`SITE_URL` and `BASE_PATH` come from `actions/configure-pages`, so the workflow
+needs no edits when the custom domain is attached: `origin` becomes
+`https://nestorhorizoneu.com` and `base_path` becomes empty, and
+`astro.config.mjs` falls back to `/`.
+
+Any other static host works too — `npm run build` and serve `dist/`. Point the
+host at `404.html` for unmatched routes.
+
+### Custom domain
+
+`public/CNAME` pins the domain to `nestorhorizoneu.com`, so it survives every
+deploy. DNS lives at WordPress.com (`ns1/2/3.wordpress.com`):
+
+| Type | Name | Value |
+| ---- | ---- | ----- |
+| `A` | `@` | `185.199.108.153` |
+| `A` | `@` | `185.199.109.153` |
+| `A` | `@` | `185.199.110.153` |
+| `A` | `@` | `185.199.111.153` |
+| `CNAME` | `www` | `georgekazakis.github.io` |
+
+**Leave the `MX` and SPF `TXT` records alone.** Email for
+`info@nestorhorizoneu.com` runs on Titan (`mx1/mx2.titan.email`) independently of
+web hosting; editing only the `A`/`CNAME` records above keeps it working. Avoid
+any "restore default records" action, which would wipe the `MX` entries.
+
+After DNS propagates, enable **Enforce HTTPS** in the repository's Pages
+settings once GitHub has provisioned the certificate.
+
+### Env vars
+
+| Variable | Default | Purpose |
+| -------- | ------- | ------- |
+| `SITE_URL` | `https://nestorhorizoneu.com` | absolute URLs (canonical, OG, sitemap) |
+| `BASE_PATH` | `/` | subpath when not served from the domain root |
+| `NOINDEX` | unset | set to `1` to emit `noindex` for preview deploys |
