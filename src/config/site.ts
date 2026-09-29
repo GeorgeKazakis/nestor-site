@@ -55,7 +55,9 @@ export const hero = {
 
 export const euFunding = {
   badge: {
-    src: '/media/EN_FundedbytheEU_RGB_NEG.png',
+    // .webp because scripts/optimize-images.mjs converts this asset after the
+    // content pull. Keep this extension in sync with that script's SKIP list.
+    src: '/media/EN_FundedbytheEU_RGB_NEG.webp',
     alt: 'Funded by the European Union',
   },
   disclaimer:

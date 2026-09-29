@@ -146,8 +146,9 @@ const TEMPLATE_ASSETS = [
   'Logo_Long-01.png', // site logo
   'cropped-NESTOR_LOGO_N-01-1.png', // favicon / apple-touch-icon
   'NESTOR_LOGO_N-01-1.png',
-  'EN_FundedbytheEU_RGB_NEG.png', // EU funding badge (header, on dark)
-  'EN_FundedbytheEU_RGB_POS.png', // EU funding badge (footer, on light)
+  // EU funding badge shown in the header. Listed under its original .png name
+  // because pruning runs before optimize-images.mjs converts it to .webp.
+  'EN_FundedbytheEU_RGB_NEG.png',
 ]
 
 /**
@@ -179,6 +180,23 @@ async function pruneUnusedMedia() {
   console.log(
     `Pruned ${removed} unreferenced assets (${(freed / 1048576).toFixed(1)}MB freed)`
   )
+
+  /*
+   * Drop media-library entries whose files were just pruned, so the index
+   * describes what's actually on disk rather than dangling at ~65 stale paths.
+   */
+  const indexPath = path.join(CONTENT, 'media.json')
+  const index = JSON.parse(await readFile(indexPath, 'utf8'))
+  const kept = Object.fromEntries(
+    Object.entries(index).filter(([, item]) =>
+      existsSync(path.join(ROOT, 'public', item.src))
+    )
+  )
+  const dropped = Object.keys(index).length - Object.keys(kept).length
+  if (dropped > 0) {
+    await writeFile(indexPath, JSON.stringify(kept, null, 2))
+    console.log(`Dropped ${dropped} stale entries from media.json`)
+  }
 }
 
 async function main() {

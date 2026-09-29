@@ -42,8 +42,12 @@ rebuild. Nothing else needs touching.
 - Resolves `?page_id=N` links to real slugs.
 - Strips Jetpack/WordPress tracking pixels.
 - Removes Automattic's Mapbox API key and blog ID from the Jetpack map block.
-- Prunes media the content doesn't reference (~659 MB of orphaned uploads,
-  including two unused videos).
+- Prunes media the content doesn't reference (~715 MB of orphaned uploads,
+  including three unused videos), and drops the matching `media.json` entries.
+- Runs `scripts/optimize-images.mjs`, which downscales anything over 2400px on
+  its longest edge and converts it to WebP, rewriting every reference. The
+  library held raw camera exports — one was 8256×5504 (45 megapixels, 14 MB)
+  displayed about 1200px wide. This takes ~50 MB of images down to ~4.6 MB.
 
 ## Design tokens
 
@@ -104,21 +108,41 @@ These are intentional. Each preserves the visual result while fixing a defect.
 8. Footer credit still reads "Designed with WordPress" (`site.credit`) — worth
    updating, since it no longer is.
 
-## Known issues worth addressing
+## Asset optimization
 
-- **The hero video is 56 MB** (`nestor2.mp4`), served uncompressed on the live
-  site too. It should be re-encoded — roughly:
-  ```bash
-  ffmpeg -i nestor2.mp4 -vf scale=1280:-2 -c:v libx264 -crf 28 -preset slow -an nestor2-web.mp4
-  ```
-  An `-an` (silent) 1280px H.264 encode should land near 2–4 MB. A poster image
-  plus `preload="none"` would help further.
-- **Several images are oversized** — `group-of-advocates-2.jpg` is 14 MB and
-  `Nicole-Bekah-tabling-2.jpg` is 9 MB. Worth converting to WebP/AVIF.
+The WordPress originals were served unoptimized. Both the video and the images
+are now processed, taking a homepage visit from ~56 MB to a couple of MB.
+
+| Asset | Before | After |
+| ----- | ------ | ----- |
+| Hero video | 55.9 MB | 2.3 MB (+ 57 KB poster) |
+| Content images | ~50 MB | ~4.6 MB |
+| `dist/` total | 107 MB | ~8 MB |
+
+- `npm run hero:optimize` — 1280×720 CRF 28 H.264 with `+faststart`, plus a
+  poster frame. Outputs to `public/hero/`, which **is committed**: `public/media/`
+  is gitignored and wiped by `content:pull`, so derivatives can't live there.
+  Needs ffmpeg; re-downloads the original if it isn't present locally.
+- `npm run images:optimize` — runs automatically as part of `content:pull`.
+  Caps the longest edge at 2400px (≈2× the 1300px layout, for retina), converts
+  to WebP, and rewrites references. Keeps the original whenever WebP comes out
+  larger, never upscales, and bakes in EXIF orientation so the phone photos
+  don't end up sideways.
+
+Two assets are deliberately **not** converted, and are listed in that script's
+`SKIP` set: the favicon (PNG has the broadest icon support) and the site logo
+(referenced from `src/config/site.ts`, so converting it would desync the config).
+The EU funding badge *is* converted — if you change that, keep
+`euFunding.badge.src` in sync with the `SKIP` list.
+
+Still outstanding:
+
+- The **live WordPress site** still serves the unoptimized originals. This
+  repo's pipeline doesn't touch it.
 - The live Contacts page renders a literal, unevaluated `context.image.src`
   placeholder — a bug in the WordPress build. Not reproduced here.
 
-`public/media/` is gitignored: it's ~107 MB and fully reproducible via
+`public/media/` is gitignored — it's fully reproducible via
 `npm run content:pull`.
 
 ## Deploying
