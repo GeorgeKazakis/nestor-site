@@ -154,12 +154,13 @@ const isHome = variant === 'home'
     z-index: 0;
   }
 
+  /* Matches WordPress's .has-background-dim, which is 50%. */
   .site-cover__overlay {
     position: absolute;
     inset: 0;
     z-index: 1;
     background-color: var(--color-tertiary);
-    opacity: 0.55;
+    opacity: 0.5;
   }
 
   .site-cover--inner .site-cover__overlay {
@@ -178,8 +179,9 @@ const isHome = variant === 'home'
     padding-block: var(--spacing-50);
   }
 
+  /* Live cover padding: 2vh 4vw 8vh 4vw. */
   .site-cover--home .site-cover__inner {
-    padding-block: var(--spacing-50) var(--spacing-80);
+    padding: 2vh 4vw 8vh;
   }
 
   /* ----------------------------------------------------------- top bar ---- */
@@ -371,14 +373,37 @@ const isHome = variant === 'home'
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .site-cover__video {
-      display: none;
-    }
-  }
+  /*
+   * Reduced motion is handled by pausing the video in JS (below), which leaves
+   * its first frame on screen. Do NOT hide it: `prefers-reduced-motion: reduce`
+   * is set by default on many Windows installs, and hiding the element there
+   * removed the hero background entirely.
+   */
 </style>
 
 <script>
+  /*
+   * Respect reduced-motion by pausing the hero video rather than hiding it, so
+   * its first frame still acts as the cover image.
+   */
+  const video = document.querySelector<HTMLVideoElement>('.site-cover__video')
+  if (video && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    video.removeAttribute('autoplay')
+    video.pause()
+    // Nudge the frame forward so a black leading frame isn't what's shown.
+    video.addEventListener(
+      'loadeddata',
+      () => {
+        try {
+          video.currentTime = 0.1
+        } catch {
+          /* seeking unsupported before metadata lands — harmless */
+        }
+      },
+      { once: true }
+    )
+  }
+
   // Mobile menu toggle. Scoped per-header so it works on every page variant.
   document.querySelectorAll<HTMLElement>('.site-nav').forEach((nav) => {
     const toggle = nav.querySelector<HTMLButtonElement>('.site-nav__toggle')
