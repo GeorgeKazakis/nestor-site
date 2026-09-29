@@ -44,7 +44,13 @@ export const hero = {
     'NESTOR is a cross-disciplinary ecosystem for the life-long training of researchers to help them carve their niche by pursuing ethical and responsible innovation in reproductive medicine',
   ],
   cta: { label: 'Learn More', href: '/about/' },
-  video: '/media/nestor2.mp4',
+  /*
+   * Web-optimised derivatives of the original 56MB upload, committed to the
+   * repo under public/hero/ so they survive `content:pull` (which wipes and
+   * re-fetches public/media/). Regenerate with `npm run hero:optimize`.
+   */
+  video: '/hero/nestor2-720.mp4',
+  poster: '/hero/nestor2-poster.jpg',
 }
 
 export const euFunding = {

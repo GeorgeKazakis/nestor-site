@@ -27,11 +27,12 @@ const isHome = variant === 'home'
         <video
           class="site-cover__video"
           src={withBase(hero.video)}
+          poster={withBase(hero.poster)}
           autoplay
           muted
           loop
           playsinline
-          preload="metadata"
+          preload="auto"
           aria-hidden="true"
           tabindex="-1"
         />

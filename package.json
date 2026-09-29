@@ -10,7 +10,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "content:pull": "node scripts/pull-content.mjs",
-    "check:links": "node scripts/check-links.mjs"
+    "check:links": "node scripts/check-links.mjs",
+    "hero:optimize": "node scripts/optimize-hero.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

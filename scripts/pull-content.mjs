@@ -140,7 +140,9 @@ async function pullFrontPage(assetMap, resolveIdLinks = (html) => html) {
  * page content, so the reference scan below can't see them.
  */
 const TEMPLATE_ASSETS = [
-  'nestor2.mp4', // hero cover background video
+  // NOTE: nestor2.mp4 is deliberately absent. The hero uses the optimised
+  // derivative in public/hero/ (see scripts/optimize-hero.mjs), so the 56MB
+  // original is pruned rather than shipped.
   'Logo_Long-01.png', // site logo
   'cropped-NESTOR_LOGO_N-01-1.png', // favicon / apple-touch-icon
   'NESTOR_LOGO_N-01-1.png',
