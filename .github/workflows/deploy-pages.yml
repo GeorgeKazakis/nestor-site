@@ -46,7 +46,11 @@ jobs:
           NOINDEX: '1'
         run: npm run build
 
+      # Needs the same BASE_PATH as the build: the emitted URLs are prefixed,
+      # so without it the checker flags every correct link as broken.
       - name: Verify no broken links
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
         run: npm run check:links
 
       - uses: actions/upload-pages-artifact@v3
