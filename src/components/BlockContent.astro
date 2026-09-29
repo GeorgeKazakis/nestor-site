@@ -1,0 +1,39 @@
+---
+/**
+ * Renders a chunk of WordPress block HTML.
+ *
+ * The markup is emitted verbatim so the block classes styled in
+ * global.css / blocks-plugins.css apply exactly as they do on the live site.
+ * Interactive behaviour that Jetpack/plugin JS normally provides is
+ * re-implemented in ../scripts/blocks.ts.
+ */
+import { rewriteBase } from '../lib/base'
+
+interface Props {
+  html: string
+}
+
+const { html } = Astro.props
+
+// Exported WordPress HTML carries hardcoded root-relative URLs; fix them up
+// when the site is served from a subpath (e.g. the GitHub Pages preview).
+const content = rewriteBase(html)
+---
+
+<div class="entry-content" set:html={content} />
+
+<script>
+  import '../scripts/blocks'
+</script>
+
+<style is:global>
+  .entry-content {
+    /* Block content brings its own alignment/padding wrappers. */
+    padding-block: 0;
+  }
+
+  /* Give top-level sections breathing room, matching the theme's rhythm. */
+  .entry-content > .wp-block-group + .wp-block-group {
+    margin-block-start: 0;
+  }
+</style>

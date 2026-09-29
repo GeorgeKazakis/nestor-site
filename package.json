@@ -1,0 +1,21 @@
+{
+  "name": "nestor-site",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NESTOR — Innovation in Reproductive Medicine. Static rebuild of nestorhorizoneu.com.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "content:pull": "node scripts/pull-content.mjs",
+    "check:links": "node scripts/check-links.mjs"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "@tailwindcss/vite": "^4.1.13",
+    "astro": "^5.14.1",
+    "tailwindcss": "^4.1.13"
+  }
+}

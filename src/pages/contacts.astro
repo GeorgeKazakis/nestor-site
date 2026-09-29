@@ -1,0 +1,37 @@
+---
+/**
+ * Contacts gets its own route because its WordPress content contains a Jetpack
+ * contact-form block that can't be exported. The pull script leaves a
+ * <!--CONTACT_FORM--> marker; the block content is rendered either side of a
+ * static-friendly replacement form.
+ */
+import Base from '../layouts/Base.astro'
+import BlockContent from '../components/BlockContent.astro'
+import PageHeading from '../components/PageHeading.astro'
+import ContactForm from '../components/ContactForm.astro'
+import { pages, plain, metaDescription } from '../lib/content'
+import { site } from '../config/site'
+
+const page = pages.find((p) => p.slug === 'contacts')!
+const title = plain(page.title) || 'Contacts'
+
+const [before, after = ''] = page.content.split('<!--CONTACT_FORM-->')
+---
+
+<Base title={title} description={metaDescription(page, site.description)}>
+  <PageHeading title={title} />
+  <BlockContent html={before} />
+  <div class="contact-form-slot has-global-padding">
+    <div class="contact-form-slot__inner">
+      <ContactForm />
+    </div>
+  </div>
+  {after && <BlockContent html={after} />}
+</Base>
+
+<style>
+  .contact-form-slot__inner {
+    max-width: var(--wide-size);
+    margin-inline: auto;
+  }
+</style>

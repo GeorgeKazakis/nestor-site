@@ -1,0 +1,49 @@
+---
+/**
+ * Page/post title band. Some WordPress pages (e.g. Contacts) ship an empty
+ * title, so render nothing rather than an empty heading.
+ */
+interface Props {
+  title: string
+  date?: string
+}
+
+const { title, date } = Astro.props
+---
+
+{
+  title && (
+    <div class="page-heading has-global-padding">
+      <div class="page-heading__inner">
+        <h1 class="wp-block-heading">{title}</h1>
+        {date && <p class="page-heading__date">{date}</p>}
+      </div>
+    </div>
+  )
+}
+
+<style>
+  .page-heading {
+    padding-block: var(--spacing-70) var(--spacing-50);
+  }
+
+  .page-heading__inner {
+    max-width: var(--wide-size);
+    margin-inline: auto;
+  }
+
+  /*
+   * The live template renders the page title as an <h3>. Kept as the page's
+   * single <h1> for semantics, but sized to match the original.
+   */
+  .page-heading h1 {
+    margin: 0;
+    font-size: var(--font-size-large);
+  }
+
+  .page-heading__date {
+    margin-top: var(--spacing-30);
+    font-size: var(--font-size-small);
+    color: var(--color-primary);
+  }
+</style>

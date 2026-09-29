@@ -1,0 +1,13 @@
+---
+/**
+ * Front page. The hero lives in the header (it's one cover block on the live
+ * site), so this route renders only the body blocks below it.
+ */
+import Base from '../layouts/Base.astro'
+import BlockContent from '../components/BlockContent.astro'
+import homeHtml from '../content/home.html?raw'
+---
+
+<Base variant="home">
+  <BlockContent html={homeHtml} />
+</Base>

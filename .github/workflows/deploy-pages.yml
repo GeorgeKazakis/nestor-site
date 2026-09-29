@@ -1,0 +1,64 @@
+name: Deploy preview to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Allow GITHUB_TOKEN to deploy to Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish rather than cancelling it mid-publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # public/media/ is gitignored (~107MB, reproducible), so fetch content
+      # and assets from the WordPress install at build time.
+      - name: Pull content from WordPress
+        run: npm run content:pull
+
+      - uses: actions/configure-pages@v5
+        id: pages
+
+      - name: Build
+        env:
+          SITE_URL: ${{ steps.pages.outputs.origin }}
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          # Preview deploy: keep it out of search results so it can't compete
+          # with the live nestorhorizoneu.com.
+          NOINDEX: '1'
+        run: npm run build
+
+      - name: Verify no broken links
+        run: npm run check:links
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment

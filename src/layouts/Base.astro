@@ -1,0 +1,92 @@
+---
+import Header from '../components/Header.astro'
+import Footer from '../components/Footer.astro'
+import { site } from '../config/site'
+import { withBase } from '../lib/base'
+import '../styles/global.css'
+import '../styles/blocks-plugins.css'
+
+interface Props {
+  title?: string
+  description?: string
+  variant?: 'home' | 'inner'
+  /** Page's featured image, used as the Open Graph share image. */
+  image?: string | null
+  /** Emitted as og:type — 'article' for posts. */
+  ogType?: 'website' | 'article'
+  publishedTime?: string
+  modifiedTime?: string
+}
+
+const {
+  title,
+  description = site.description,
+  variant = 'inner',
+  image = null,
+  ogType = 'website',
+  publishedTime,
+  modifiedTime,
+} = Astro.props
+
+const pageTitle = title ? `${title} – ${site.title}` : site.title
+const currentPath = Astro.url.pathname
+
+/*
+ * Resolve absolute URLs against the *deploy target* (Astro.site), not the
+ * hardcoded production domain, so the GitHub Pages preview self-references
+ * correctly instead of pointing at the live site.
+ */
+const origin = Astro.site ?? new URL(site.url)
+const canonical = new URL(currentPath, origin).href
+const ogImage = new URL(withBase(image ?? site.logo.src), origin).href
+
+/** Set NOINDEX=1 for preview deploys so they can't compete with the live site. */
+const noindex = Boolean(import.meta.env.NOINDEX)
+---
+
+<!doctype html>
+<html lang={site.locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    <link rel="icon" href={withBase(site.favicon)} sizes="192x192" />
+    <link rel="apple-touch-icon" href={withBase(site.favicon)} />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={site.title} />
+    <meta property="og:title" content={title ?? site.title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="en_US" />
+    {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+    {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap"
+    />
+  </head>
+
+  <body>
+    <a class="skip-link screen-reader-text" href="#content">Skip to content</a>
+
+    <div class="wp-site-blocks">
+      <Header variant={variant} currentPath={currentPath} />
+
+      <main id="content">
+        <slot />
+      </main>
+
+      <Footer />
+    </div>
+  </body>
+</html>

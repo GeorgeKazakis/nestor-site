@@ -1,0 +1,135 @@
+---
+/**
+ * Replaces the Jetpack contact-form block, which posted back to WordPress PHP
+ * and can't work on a static host.
+ *
+ * Submits via fetch to `contact.formEndpoint` when one is configured. With no
+ * endpoint set it degrades to opening a pre-filled email, so the page is still
+ * usable out of the box.
+ */
+import { contact } from '../config/site'
+
+const hasEndpoint = Boolean(contact.formEndpoint)
+---
+
+<form
+  class="contact-form"
+  action={contact.formEndpoint || undefined}
+  method="post"
+  data-endpoint={contact.formEndpoint}
+  data-mailto={contact.email}
+  novalidate
+>
+  <div class="grunion-field-wrap">
+    <label for="contact-name">Name <span aria-hidden="true">(required)</span></label>
+    <input id="contact-name" name="name" type="text" autocomplete="name" required />
+  </div>
+
+  <div class="grunion-field-wrap">
+    <label for="contact-email">Email <span aria-hidden="true">(required)</span></label>
+    <input id="contact-email" name="email" type="email" autocomplete="email" required />
+  </div>
+
+  <div class="grunion-field-wrap">
+    <label for="contact-message">Message</label>
+    <textarea id="contact-message" name="message" rows="6"></textarea>
+  </div>
+
+  <button type="submit">{hasEndpoint ? 'Submit' : 'Send email'}</button>
+
+  <p class="contact-form__status" role="status" aria-live="polite"></p>
+</form>
+
+<style>
+  .contact-form {
+    max-width: 34rem;
+  }
+
+  .contact-form label span {
+    opacity: 0.7;
+  }
+
+  .contact-form__status {
+    margin: 0;
+    min-height: 1.5em;
+    font-size: var(--font-size-small);
+  }
+
+  .contact-form__status[data-state='error'] {
+    color: #ff9b9b;
+  }
+
+  .contact-form__status[data-state='success'] {
+    color: var(--color-secondary);
+  }
+
+  .contact-form[data-busy='true'] button[type='submit'] {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+</style>
+
+<script>
+  import { contact } from '../config/site'
+
+  const form = document.querySelector<HTMLFormElement>('.contact-form')
+  if (form) {
+    const status = form.querySelector<HTMLElement>('.contact-form__status')!
+    const endpoint = form.dataset.endpoint
+    const mailto = form.dataset.mailto!
+
+    const setStatus = (message: string, state: 'error' | 'success' | '') => {
+      status.textContent = message
+      if (state) status.dataset.state = state
+      else delete status.dataset.state
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault()
+
+      const data = new FormData(form)
+      const name = String(data.get('name') ?? '').trim()
+      const email = String(data.get('email') ?? '').trim()
+      const message = String(data.get('message') ?? '').trim()
+
+      if (!name || !email) {
+        setStatus('Please provide your name and email.', 'error')
+        return
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setStatus('Please provide a valid email address.', 'error')
+        return
+      }
+
+      // No form backend configured — hand off to the visitor's mail client.
+      if (!endpoint) {
+        const subject = encodeURIComponent(`Website enquiry from ${name}`)
+        const body = encodeURIComponent(`${message}\n\n— ${name} (${email})`)
+        window.location.href = `mailto:${mailto}?subject=${subject}&body=${body}`
+        setStatus('Opening your email client…', '')
+        return
+      }
+
+      form.dataset.busy = 'true'
+      setStatus('Submitting form…', '')
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: data,
+        })
+        if (!res.ok) throw new Error(String(res.status))
+        form.reset()
+        setStatus(contact.successMessage, 'success')
+      } catch {
+        setStatus(
+          `Sorry, that didn't send. Please email ${mailto} instead.`,
+          'error'
+        )
+      } finally {
+        delete form.dataset.busy
+      }
+    })
+  }
+</script>

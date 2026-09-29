@@ -1,0 +1,56 @@
+---
+import Base from '../layouts/Base.astro'
+import { nav } from '../config/site'
+import { withBase } from '../lib/base'
+---
+
+<Base title="Page not found">
+  <div class="notfound has-global-padding">
+    <div class="notfound__inner">
+      <p class="notfound__code">404</p>
+      <h1 class="wp-block-heading">This page could not be found</h1>
+      <p>
+        The page you were looking for may have been moved or removed. Try one of
+        the sections below, or head back to the
+        <a href={withBase('/')}>homepage</a>.
+      </p>
+
+      <div class="wp-block-buttons">
+        {
+          nav.map((item) => (
+            <div class="wp-block-button is-style-outline">
+              <a class="wp-block-button__link" href={withBase(item.href)}>
+                {item.label}
+              </a>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .notfound {
+    padding-block: var(--spacing-80);
+  }
+
+  .notfound__inner {
+    max-width: var(--content-size);
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-50);
+  }
+
+  .notfound__code {
+    font-size: var(--font-size-xx-large);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--color-secondary);
+  }
+
+  .notfound a {
+    color: var(--color-secondary);
+  }
+</style>

@@ -1,0 +1,133 @@
+---
+/**
+ * Replicates the WordPress footer template part.
+ *
+ * Structure mirrors the live block markup: one space-between row holding the
+ * site title, the Horizon Europe funding disclaimer and the right-aligned link
+ * column, followed by a small credit line.
+ *
+ * Deviation: the live template renders the site title as an <h1> in the footer
+ * (and again in the inner-page header), giving every page two or three h1s.
+ * Rendered as a styled <p> here so each page has exactly one h1, with the
+ * visual result unchanged.
+ */
+import { site, euFunding, footerLinks } from '../config/site'
+import { withBase } from '../lib/base'
+---
+
+<footer class="wp-block-template-part">
+  <div class="site-footer has-contrast-color has-tertiary-background-color">
+    <div class="site-footer__inner alignwide has-global-padding">
+      <div class="site-footer__row">
+        <div class="site-footer__brand">
+          <p class="site-footer__title has-large-font-size">
+            <a href={withBase('/')}>{site.title}</a>
+          </p>
+        </div>
+
+        <div class="site-footer__disclaimer">
+          <p class="wp-block-paragraph">{euFunding.disclaimer}</p>
+        </div>
+
+        <div class="site-footer__links">
+          {
+            footerLinks.map((link) => (
+              <p class="has-text-align-right wp-block-paragraph">
+                <a href={withBase(link.href)}>{link.label}</a>
+              </p>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="site-footer__credit">
+        <p class="has-primary-color has-text-color wp-block-paragraph">{site.credit}</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    /* The live footer uses a 10vh top pad to separate it from page content. */
+    padding-block: 10vh var(--spacing-60);
+  }
+
+  .site-footer__inner {
+    max-width: var(--wide-size);
+    margin-inline: auto;
+  }
+
+  .site-footer__row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-60);
+    margin-bottom: 4rem;
+  }
+
+  .site-footer__brand {
+    flex: 1 1 18ch;
+  }
+
+  .site-footer__title {
+    margin: 0;
+    font-size: var(--font-size-large);
+    line-height: 1.2;
+    text-transform: capitalize;
+  }
+
+  .site-footer__title a {
+    text-decoration: none;
+  }
+
+  .site-footer__disclaimer {
+    flex: 2 1 42ch;
+    font-size: var(--font-size-small);
+    line-height: 1.65;
+    color: var(--color-primary);
+  }
+
+  .site-footer__links {
+    flex: 0 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--spacing-30);
+    font-size: var(--font-size-small);
+  }
+
+  .site-footer__links p {
+    margin: 0;
+  }
+
+  .site-footer__links a {
+    text-decoration: none;
+  }
+
+  .site-footer__links a:hover {
+    color: var(--color-secondary);
+    text-decoration: underline;
+  }
+
+  .site-footer__credit p {
+    margin: 0;
+    font-size: 0.7rem;
+  }
+
+  @media (max-width: 782px) {
+    .site-footer__row {
+      flex-direction: column;
+      margin-bottom: var(--spacing-70);
+    }
+
+    .site-footer__links {
+      align-items: flex-start;
+    }
+
+    .site-footer__links p {
+      text-align: left;
+    }
+  }
+</style>

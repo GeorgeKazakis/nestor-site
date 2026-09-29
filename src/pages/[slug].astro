@@ -1,0 +1,41 @@
+---
+/**
+ * All WordPress pages: /about/, /events/, /voices/, /faq/, etc.
+ * Slugs come straight from the REST snapshot, so URLs match the live site.
+ */
+import Base from '../layouts/Base.astro'
+import BlockContent from '../components/BlockContent.astro'
+import PageHeading from '../components/PageHeading.astro'
+import { pages, plain, metaDescription, type Entry } from '../lib/content'
+import { site } from '../config/site'
+
+export function getStaticPaths() {
+  // Contacts is handled by its own route (it needs a replacement form).
+  // Declared inline: Astro evaluates getStaticPaths in an isolated scope.
+  const excluded = new Set(['contacts'])
+
+  return pages
+    .filter((page) => !excluded.has(page.slug))
+    .map((page) => ({
+      params: { slug: page.slug },
+      props: { page },
+    }))
+}
+
+interface Props {
+  page: Entry
+}
+
+const { page } = Astro.props
+const title = plain(page.title)
+---
+
+<Base
+  title={title}
+  description={metaDescription(page, site.description)}
+  image={page.featuredMedia?.src}
+  modifiedTime={page.modified}
+>
+  <PageHeading title={title} />
+  <BlockContent html={page.content} />
+</Base>

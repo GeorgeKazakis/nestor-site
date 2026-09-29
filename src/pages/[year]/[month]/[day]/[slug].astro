@@ -1,0 +1,47 @@
+---
+/**
+ * Blog posts, preserving WordPress's dated permalinks (/YYYY/MM/DD/slug/)
+ * so existing inbound links and search results keep resolving.
+ */
+import Base from '../../../../layouts/Base.astro'
+import BlockContent from '../../../../components/BlockContent.astro'
+import PageHeading from '../../../../components/PageHeading.astro'
+import { posts, plain, formatDate, metaDescription, type Entry } from '../../../../lib/content'
+import { site } from '../../../../config/site'
+
+export function getStaticPaths() {
+  return posts.map((post) => {
+    const d = new Date(post.date)
+    return {
+      params: {
+        year: String(d.getFullYear()),
+        month: String(d.getMonth() + 1).padStart(2, '0'),
+        day: String(d.getDate()).padStart(2, '0'),
+        slug: post.slug,
+      },
+      props: { post },
+    }
+  })
+}
+
+interface Props {
+  post: Entry
+}
+
+const { post } = Astro.props
+const title = plain(post.title)
+---
+
+<Base
+  title={title}
+  description={metaDescription(post, site.description)}
+  image={post.featuredMedia?.src}
+  ogType="article"
+  publishedTime={post.date}
+  modifiedTime={post.modified}
+>
+  <article>
+    <PageHeading title={title} date={formatDate(post.date)} />
+    <BlockContent html={post.content} />
+  </article>
+</Base>

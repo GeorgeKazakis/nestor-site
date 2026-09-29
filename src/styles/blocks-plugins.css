@@ -1,0 +1,475 @@
+/*
+ * Styles for the third-party block plugins the WordPress site relies on.
+ * Each block's markup is preserved exactly as WordPress emits it, so these
+ * rules target the original class names.
+ */
+
+/* ------------------------------------------- Toggles (FAQ) — native details ---- */
+
+.wp-block-toggles {
+  border-bottom: 1px solid rgb(234 234 234 / 0.18);
+  padding: var(--spacing-50) 0;
+}
+
+.wp-block-toggles > summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-40);
+  font-size: var(--font-size-large);
+  font-weight: 400;
+  line-height: 1.25;
+  list-style: none;
+  transition: color 0.18s ease;
+}
+
+.wp-block-toggles > summary::-webkit-details-marker {
+  display: none;
+}
+
+.wp-block-toggles > summary::after {
+  content: '';
+  flex: 0 0 auto;
+  width: 0.6em;
+  height: 0.6em;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.22s ease;
+}
+
+.wp-block-toggles[open] > summary {
+  color: var(--color-secondary);
+}
+
+.wp-block-toggles[open] > summary::after {
+  transform: rotate(-135deg);
+}
+
+.wp-block-toggles__content {
+  padding-top: var(--spacing-40);
+  max-width: var(--content-size);
+}
+
+.wp-block-toggles__content > * + * {
+  margin-top: var(--spacing-40);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wp-block-toggles[open] .wp-block-toggles__content {
+    animation: toggle-reveal 0.28s ease;
+  }
+}
+
+@keyframes toggle-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ------------------------------------- Advanced Accordion (horizontal) block ---- */
+
+.wp-block-aab-horizontal-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-30);
+}
+
+.wp-block-aab-horizontal-accordion-item {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.aahb_accordion_head {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-40);
+  padding: var(--spacing-50);
+  cursor: pointer;
+  user-select: none;
+}
+
+.aahb_accordion_icon_wrapper {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.aahb_accordion_icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+/* The dashicon placeholder is an editor-only affordance. */
+.aahb_icon_upload {
+  display: none;
+}
+
+.aahb_accordion_heading {
+  min-width: 0;
+}
+
+.aahb_heading {
+  margin: 0;
+  font-size: var(--font-size-large);
+  line-height: 1.2;
+}
+
+.aahb_subheading {
+  margin: 0.25em 0 0;
+  font-size: var(--font-size-small);
+  opacity: 0.8;
+}
+
+.aahb_accordion_body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+  padding-inline: var(--spacing-50);
+}
+
+.aahb_accordion_body > * {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.wp-block-aab-horizontal-accordion-item.is-open .aahb_accordion_body {
+  grid-template-rows: 1fr;
+  padding-bottom: var(--spacing-50);
+}
+
+/* Fallback for browsers without animatable grid-template-rows. */
+@supports not (grid-template-rows: 1fr) {
+  .aahb_accordion_body {
+    display: none;
+  }
+  .wp-block-aab-horizontal-accordion-item.is-open .aahb_accordion_body {
+    display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aahb_accordion_body {
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------- Timeline block ---- */
+
+.timeline-item {
+  position: relative;
+  padding-left: var(--spacing-70);
+  padding-bottom: var(--spacing-70);
+}
+
+/* The vertical rail connecting consecutive entries. */
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 0.55em;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--color-secondary),
+    rgb(49 226 162 / 0.15)
+  );
+}
+
+.timeline-item:last-child::before {
+  display: none;
+}
+
+.timeline-item__dot {
+  position: absolute;
+  left: 0;
+  top: 0.35em;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-secondary);
+  box-shadow: 0 0 0 5px rgb(49 226 162 / 0.16);
+  z-index: 1;
+}
+
+.timeline-item__bubble {
+  background: var(--color-contrast);
+  color: var(--color-base);
+  border-radius: 6px;
+  padding: var(--spacing-50);
+}
+
+.timeline-item__bubble > * + * {
+  margin-top: var(--spacing-40);
+}
+
+@media (max-width: 600px) {
+  .timeline-item {
+    padding-left: var(--spacing-60);
+  }
+}
+
+/* ------------------------------------------------- Jetpack slideshow block ---- */
+/*
+ * Jetpack ships a Swiper-driven slideshow. Rebuilt here as a CSS
+ * scroll-snap carousel — same markup, no 40kb of Swiper.
+ */
+
+.wp-block-jetpack-slideshow {
+  position: relative;
+}
+
+.wp-block-jetpack-slideshow_container {
+  overflow: hidden;
+}
+
+.wp-block-jetpack-slideshow_swiper-wrapper {
+  display: flex;
+  gap: var(--spacing-40);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.wp-block-jetpack-slideshow_swiper-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.wp-block-jetpack-slideshow_slide {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wp-block-jetpack-slideshow_slide figure {
+  width: 100%;
+}
+
+.wp-block-jetpack-slideshow_image {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  margin-inline: auto;
+}
+
+.wp-block-jetpack-slideshow_button-prev,
+.wp-block-jetpack-slideshow_button-next {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  z-index: 3;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 50%;
+  background: rgb(26 26 26 / 0.62);
+  color: var(--color-contrast);
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+.wp-block-jetpack-slideshow_button-prev:hover,
+.wp-block-jetpack-slideshow_button-next:hover {
+  background: var(--color-secondary);
+  color: var(--color-tertiary);
+}
+
+.wp-block-jetpack-slideshow_button-prev {
+  left: 12px;
+}
+.wp-block-jetpack-slideshow_button-next {
+  right: 12px;
+}
+
+.wp-block-jetpack-slideshow_button-prev::before {
+  content: '\2039';
+  font-size: 1.9rem;
+  line-height: 1;
+}
+.wp-block-jetpack-slideshow_button-next::before {
+  content: '\203A';
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+/* Autoplay pause control is meaningless without Swiper autoplay. */
+.wp-block-jetpack-slideshow_button-pause {
+  display: none;
+}
+
+.wp-block-jetpack-slideshow_pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: var(--spacing-40);
+}
+
+.wp-block-jetpack-slideshow_pagination .swiper-pagination-bullet {
+  width: 9px;
+  height: 9px;
+  border: none;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--color-primary);
+  opacity: 0.45;
+  cursor: pointer;
+  transition: opacity 0.18s ease, background 0.18s ease;
+}
+
+.wp-block-jetpack-slideshow_pagination .swiper-pagination-bullet[aria-current='true'] {
+  background: var(--color-secondary);
+  opacity: 1;
+}
+
+/* ----------------------------------------------- Jetpack tiled gallery ---- */
+
+.wp-block-jetpack-tiled-gallery .tiled-gallery__row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.wp-block-jetpack-tiled-gallery .tiled-gallery__col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.wp-block-jetpack-tiled-gallery img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+@media (max-width: 600px) {
+  .wp-block-jetpack-tiled-gallery .tiled-gallery__row {
+    flex-direction: column;
+  }
+}
+
+/* ------------------------------------------------- Events page custom classes ---- */
+/*
+ * The events page marks up each entry with bespoke utility classes added by
+ * the site editor. Reproduced here to keep the events layout intact.
+ */
+
+.is-event-date {
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-secondary);
+}
+
+.is-event-time {
+  font-size: var(--font-size-small);
+  color: var(--color-primary);
+}
+
+.is-event-name {
+  font-size: var(--font-size-large);
+  line-height: 1.25;
+}
+
+.is-event-cta {
+  margin-top: var(--spacing-40);
+}
+
+/* ---------------------------------------------- Jetpack contact/subscribe form ---- */
+
+.wp-block-jetpack-contact-form,
+.wp-block-jetpack-subscriptions,
+form.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-40);
+}
+
+.grunion-field-wrap,
+.wp-block-jetpack-contact-form .grunion-field-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+input[type='text'],
+input[type='email'],
+input[type='url'],
+input[type='tel'],
+textarea,
+select {
+  width: 100%;
+  padding: 0.8em 1em;
+  border: 1px solid rgb(234 234 234 / 0.28);
+  border-radius: 4px;
+  background: rgb(255 255 255 / 0.04);
+  color: var(--color-contrast);
+  font: inherit;
+  font-size: var(--font-size-small);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-primary);
+  opacity: 0.75;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-secondary);
+  outline: none;
+}
+
+textarea {
+  min-height: 9rem;
+  resize: vertical;
+}
+
+label {
+  font-size: var(--font-size-small);
+  color: var(--color-primary);
+}
+
+button[type='submit'],
+input[type='submit'],
+.wp-block-button__link[type='submit'] {
+  align-self: flex-start;
+  padding: 0.85em 1.9em;
+  border: none;
+  border-radius: 999px;
+  background: var(--color-secondary);
+  color: var(--color-tertiary);
+  font: inherit;
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+
+button[type='submit']:hover,
+input[type='submit']:hover {
+  background: var(--color-contrast);
+  transform: translateY(-2px);
+}
